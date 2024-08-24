@@ -1,66 +1,88 @@
 import requests
 import pandas as pd
-import json
-from io import StringIO
-from .constants import BASE_URL
+import logging
 from .exceptions import PIPAPIError
 from .cache import cache_response, get_cached_response
+from .server import current_server, set_server
+from .logger import pippy_logger
 
 
 def get_stats(
     country="all",
     year="all",
-    povline=2.15,
+    povline=None,
     popshare=None,
     fill_gaps=False,
-    subgroup=None,
+    region=None,
     welfare_type="all",
     reporting_level="all",
-    version=None,
     ppp_version=None,
     release_version=None,
     format="json",
+    group_by=None,
     debug=False,
     use_cache=True,
 ):
-    cache_key = f"stats_{country}_{year}_{povline}_{welfare_type}_{reporting_level}_{version}_{ppp_version}_{release_version}"
+    if debug:
+        pippy_logger.setLevel(logging.DEBUG)
+    else:
+        pippy_logger.setLevel(logging.INFO)
+
+    pippy_logger.debug("Debug mode enabled")
+
+    cache_key = f"stats_{country}_{year}_{povline}_{popshare}_{welfare_type}_{reporting_level}_{ppp_version}_{release_version}"
 
     if use_cache:
         cached_data = get_cached_response(cache_key)
         if cached_data:
+            pippy_logger.debug("Using cached data")
             return pd.DataFrame(cached_data)
 
-    endpoint = "pip" if subgroup is None else "pip-grp"
+    endpoint = "pip-grp" if group_by else "pip"
+    url = f"{current_server}/{endpoint}"
+
     params = {
-        k: v
-        for k, v in locals().items()
-        if v is not None and k not in ["subgroup", "debug"]
+        "country": country if country != "all" else "ALL",
+        "year": year if year != "all" else "ALL",
+        "povline": povline,
+        "popshare": popshare,
+        "fill_gaps": "true" if fill_gaps else None,
+        "welfare_type": welfare_type,
+        "reporting_level": reporting_level,
+        "ppp_version": ppp_version,
+        "release_version": release_version,
+        "format": format,
     }
 
-    if subgroup:
-        params["group_by"] = "wb" if subgroup == "wb_regions" else subgroup
+    if region:
+        params["country"] = region
 
-    url = f"{BASE_URL}/{endpoint}"
+    if group_by:
+        params["group_by"] = "wb" if group_by == "wb" else "none"
 
-    if debug:
-        print(f"Request URL: {url}")
-        print(f"Request params: {params}")
+    # Remove None values
+    params = {k: v for k, v in params.items() if v is not None}
+
+    pippy_logger.debug(f"Request URL: {url}")
+    pippy_logger.debug(f"Request params: {params}")
 
     try:
         response = requests.get(url, params=params, timeout=10)
-        if debug:
-            print(f"Response status code: {response.status_code}")
-            print(f"Response headers: {response.headers}")
-            print(f"Raw response content: {response.text[:1000]}...")
+        pippy_logger.debug(f"Response status code: {response.status_code}")
+        pippy_logger.debug(f"Response headers: {response.headers}")
+        pippy_logger.debug(f"Raw response content: {response.text[:1000]}...")
         response.raise_for_status()
 
-        if (
-            "text/html" in response.headers.get("Content-Type", "")
-            or "<html>" in response.text[:100]
-        ):
-            raise PIPAPIError(
-                "API returned HTML instead of expected JSON. The service may be experiencing issues."
-            )
+        content_type = response.headers.get("Content-Type", "")
+        if "application/json" not in content_type:
+            if "<html>" in response.text[:100]:
+                raise PIPAPIError(
+                    "API returned an HTML error page. The service may be experiencing issues."
+                )
+            else:
+                raise PIPAPIError(
+                    f"Unexpected content type: {content_type}. Full response: {response.text[:1000]}..."
+                )
 
         data = response.json()
         df = (
@@ -68,23 +90,28 @@ def get_stats(
             if isinstance(data, list)
             else pd.DataFrame([data])
         )
-        cache_response(cache_key, data)
+
+        if use_cache:
+            cache_response(cache_key, data)
+
         return df
     except requests.RequestException as e:
-        if debug:
-            print(f"Request exception: {str(e)}")
-            print(f"Response content: {response.text[:1000]}...")
-        raise PIPAPIError(f"API request failed: {str(e)}")
+        pippy_logger.error(f"API request failed: {str(e)}")
+        if isinstance(e, requests.HTTPError) and e.response.status_code == 500:
+            raise PIPAPIError(
+                "The API server encountered an internal error. Please try again later or contact the API maintainers."
+            )
+        raise PIPAPIError(
+            f"API request failed: {str(e)}\nResponse content: {getattr(e.response, 'text', '')[:1000]}..."
+        )
     except ValueError as e:
-        if debug:
-            print(f"Failed to parse response: {str(e)}")
+        pippy_logger.error(f"Failed to parse API response: {str(e)}")
         raise PIPAPIError(f"Failed to parse API response: {str(e)}")
 
 
 def get_wb(
     year="all",
-    povline=2.15,
-    version=None,
+    povline=None,
     ppp_version=None,
     release_version=None,
     format="json",
@@ -93,9 +120,12 @@ def get_wb(
         country="all",
         year=year,
         povline=povline,
-        subgroup="wb_regions",
-        version=version,
+        group_by="wb",
         ppp_version=ppp_version,
         release_version=release_version,
         format=format,
     )
+
+
+# Ensure the server is set correctly
+set_server()

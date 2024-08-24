@@ -9,5 +9,6 @@ from .aux import (
 )
 from .utils import check_api, get_versions, get_pip_info
 from .exceptions import PIPAPIError
+from .server import set_server
 
 __version__ = "0.1.0"

@@ -1,8 +1,8 @@
 import requests
 import pandas as pd
 from io import StringIO
-from .constants import BASE_URL
 from .exceptions import PIPAPIError
+from .server import current_server
 
 
 def get_aux(
@@ -14,7 +14,7 @@ def get_aux(
     assign_tb=False,
 ):
     if table is None:
-        response = requests.get(f"{BASE_URL}/aux")
+        response = requests.get(f"{current_server}/aux")
         return response.json()
 
     params = {
@@ -24,7 +24,7 @@ def get_aux(
     }
 
     try:
-        response = requests.get(f"{BASE_URL}/aux", params=params)
+        response = requests.get(f"{current_server}/aux", params=params)
         response.raise_for_status()
     except requests.RequestException as e:
         raise PIPAPIError(f"API request failed: {str(e)}")
