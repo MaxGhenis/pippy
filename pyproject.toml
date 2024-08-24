@@ -40,5 +40,23 @@ docs = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/maxghenis/pippy"
-"Bug Tracker" = "https://github.com/maxghenis/pippy/issues"
+"Homepage" = "https://github.com/yourusername/pippy"
+"Bug Tracker" = "https://github.com/yourusername/pippy/issues"
+
+[tool.black]
+line-length = 79
+target-version = ['py310', 'py311', 'py312']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''

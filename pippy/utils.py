@@ -1,5 +1,4 @@
 import requests
-from .constants import SERVERS, DEFAULT_SERVER
 from .exceptions import PIPAPIError
 from .server import current_server
 
