@@ -8,7 +8,8 @@ def check_api_status():
     """
     Check the status of different API endpoints.
 
-    :return: A dictionary with the status of each endpoint
+    Returns:
+        dict: A dictionary with the status of each endpoint.
     """
     endpoints = {
         "pip": f"{current_server}/pip",
@@ -37,8 +38,14 @@ def check_api(api_version="v1"):
     """
     Check internet connection and API status.
 
-    :param api_version: API version
-    :return: API status information
+    Args:
+        api_version (str): API version. Defaults to "v1".
+
+    Returns:
+        dict: API status information.
+
+    Raises:
+        PIPAPIError: If the API health check fails.
     """
     try:
         response = requests.get(f"{current_server}/health-check")
@@ -52,8 +59,14 @@ def get_versions(api_version="v1"):
     """
     Get available data versions.
 
-    :param api_version: API version
-    :return: Available data versions
+    Args:
+        api_version (str): API version. Defaults to "v1".
+
+    Returns:
+        dict: Available data versions.
+
+    Raises:
+        PIPAPIError: If the request to retrieve versions fails.
     """
     try:
         response = requests.get(f"{current_server}/versions")
@@ -67,8 +80,14 @@ def get_pip_info(api_version="v1"):
     """
     Get information about the API.
 
-    :param api_version: API version
-    :return: API information
+    Args:
+        api_version (str): API version. Defaults to "v1".
+
+    Returns:
+        dict: API information.
+
+    Raises:
+        PIPAPIError: If the request to retrieve PIP info fails.
     """
     try:
         response = requests.get(f"{current_server}/pip-info")

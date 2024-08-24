@@ -23,6 +23,31 @@ def get_stats(
     debug=False,
     use_cache=True,
 ):
+    """
+    Retrieve poverty and inequality statistics from the World Bank's PIP API.
+
+    Args:
+        country (str): Country code or 'all' for all countries. Defaults to 'all'.
+        year (str or int): Year or 'all' for all years. Defaults to 'all'.
+        povline (float, optional): Poverty line in PPP dollars per day.
+        popshare (float, optional): Population share (0-100).
+        fill_gaps (bool): Whether to fill gaps in the data. Defaults to False.
+        region (str, optional): Region code.
+        welfare_type (str): Type of welfare measure. Defaults to 'all'.
+        reporting_level (str): Level of reporting. Defaults to 'all'.
+        ppp_version (str, optional): Version of PPP to use.
+        release_version (str, optional): Release version of the data.
+        format (str): Format of the returned data. Defaults to 'json'.
+        group_by (str, optional): Grouping option for the data.
+        debug (bool): Enable debug logging. Defaults to False.
+        use_cache (bool): Use cached data if available. Defaults to True.
+
+    Returns:
+        pandas.DataFrame: A DataFrame containing the requested statistics.
+
+    Raises:
+        PIPAPIError: If the API request fails or returns unexpected data.
+    """
     if debug:
         pippy_logger.setLevel(logging.DEBUG)
     else:
@@ -116,6 +141,22 @@ def get_wb(
     release_version=None,
     format="json",
 ):
+    """
+    Retrieve World Bank global/regional statistics from the PIP API.
+
+    Args:
+        year (str or int): Year or 'all' for all years. Defaults to 'all'.
+        povline (float, optional): Poverty line in PPP dollars per day.
+        ppp_version (str, optional): Version of PPP to use.
+        release_version (str, optional): Release version of the data.
+        format (str): Format of the returned data. Defaults to 'json'.
+
+    Returns:
+        pandas.DataFrame: A DataFrame containing the World Bank global/regional statistics.
+
+    Raises:
+        PIPAPIError: If the API request fails or returns unexpected data.
+    """
     return get_stats(
         country="all",
         year=year,
