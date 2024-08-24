@@ -38,16 +38,28 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
+      - name: Debug Info
+        run: |
+          python --version
+          pip --version
+          which python
+          which pip
+          echo $PYTHONPATH
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -e ".[dev]"
           pip freeze
+          pip show requests
+      - name: Debug Installed Packages
+        run: |
+          pip list
+          python -c "import site; print(site.getsitepackages())"
       - name: Run tests
         run: |
           python -c "import sys; print(sys.path)"
           python -c "import pippy; print(pippy.__file__)"
-          make test
+          python -m pytest tests/ --verbose
       - uses: codecov/codecov-action@v4
 
   build:
