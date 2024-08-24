@@ -10,57 +10,6 @@ env:
   PYTHON_VERSION: "3.12"
 
 jobs:
-  debug-install:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-      - name: Debug Info
-        run: |
-          python --version
-          pip --version
-          which python
-          which pip
-          echo $PYTHONPATH
-      - name: Install package
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e .
-          pip freeze
-      - name: Install dev dependencies
-        run: |
-          pip install -e ".[dev]"
-          pip freeze
-      - name: Debug Installed Packages
-        run: |
-          pip list
-          python -c "import site; print(site.getsitepackages())"
-          python -c "import sys; print(sys.path)"
-      - name: Test imports
-        run: |
-          python -c "import requests; print(requests.__file__)"
-          python -c "import pandas; print(pandas.__file__)"
-          python -c "import pippy; print(pippy.__file__)"
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install requests
-          pip install -e ".[dev]"
-          pip freeze
-      - name: Lint
-        run: make lint
-
   test:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -72,31 +21,29 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      - name: Debug Info
-        run: |
-          python --version
-          pip --version
-          which python
-          which pip
-          echo $PYTHONPATH
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install requests
-          pip install -e ".[dev]"
+          pip install .[dev]
           pip freeze
-          pip show requests
-      - name: Debug Installed Packages
-        run: |
-          pip list
-          python -c "import site; print(site.getsitepackages())"
-          python -c "import requests; print(requests.__file__)"
       - name: Run tests
-        run: |
-          python -c "import sys; print(sys.path)"
-          python -c "import pippy; print(pippy.__file__)"
-          python -m pytest tests/ --verbose
+        run: pytest tests/ --cov=pippy --cov-report=xml
       - uses: codecov/codecov-action@v4
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install .[dev]
+      - name: Lint
+        run: black . --check
 
   build:
     needs: [lint, test]
@@ -109,10 +56,10 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Install dependencies
         run: |
+          python -m pip install --upgrade pip
           pip install build
-          pip install requests
       - name: Build package
-        run: make build
+        run: python -m build
 
   docs:
     needs: [lint, test]
@@ -125,10 +72,10 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Install dependencies
         run: |
-          pip install requests
-          pip install -e ".[docs]"
+          python -m pip install --upgrade pip
+          pip install .[docs]
       - name: Build docs
-        run: make docs
+        run: mkdocs build
       - name: Deploy to GitHub Pages
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: peaceiris/actions-gh-pages@v3
