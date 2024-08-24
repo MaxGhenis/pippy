@@ -21,12 +21,11 @@ setup(
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
-        "Programming Language :: Python :: 3.12",
     ],
-    python_requires=">=3.10",
+    python_requires=">=3.10,<3.12",
     install_requires=[
-        "requests>=2.26.0",
-        "pandas>=1.3.3",
+        "requests>=2.26.0,<3",
+        "pandas>=1.3.3,<2",
     ],
     extras_require={
         "dev": [
