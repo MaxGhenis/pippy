@@ -10,11 +10,9 @@ You can install pippy using pip:
 pip install pippy
 ```
 
-## Example
+## Usage
 
-This is a basic example that shows how to retrieve some key poverty and inequality statistics.
-
-### Retrieve statistics
+Here's a basic example of how to use pippy:
 
 ```python
 import pippy
@@ -26,54 +24,30 @@ print(df.head())
 # Get World Bank global/regional stats
 wb_stats = pippy.get_wb(year="all")
 print(wb_stats.head())
+
+# Get auxiliary data
+countries = pippy.get_countries()
+print(countries.head())
 ```
 
-### Access data dictionary
+## Running Tests
 
-```python
-dictionary = pippy.get_dictionary()
-print(dictionary.head())
+To run the tests, make sure you have pytest installed and then run:
+
+```
+pytest
 ```
 
-## Available Functions
+Note that some tests may be skipped if the World Bank API is unavailable.
 
-- `get_stats()`: Get poverty and inequality statistics
-- `get_wb()`: Get World Bank global and regional aggregates
-- `get_aux()`: Get auxiliary data
-- `get_countries()`: Get country information
-- `get_regions()`: Get region information
-- `get_cpi()`: Get Consumer Price Index data
-- `get_dictionary()`: Get data dictionary
-- `get_gdp()`: Get Gross Domestic Product data
-- `check_api()`: Check API status
-- `get_versions()`: Get available data versions
-- `get_pip_info()`: Get information about the API
+## Known Limitations
 
-## Error Handling
+- The package depends on the availability of the World Bank PIP API. If the API is down or experiencing issues, some functions may not work as expected.
+- Large data requests may take some time to process.
 
-The package uses a custom `PIPAPIError` exception to handle API-specific errors. Always wrap your API calls in a try-except block to handle potential errors gracefully.
+## Contributing
 
-```python
-try:
-    stats = pippy.get_stats(country="ALB")
-except pippy.api.PIPAPIError as e:
-    print(f"An error occurred: {str(e)}")
-```
-
-## Citation
-
-To cite package `pippy` in publications, please use:
-
-      [Your Name] (2023). pippy: Python Client for the PIP API. https://github.com/[your_username]/pippy
-
-A BibTeX entry for LaTeX users is:
-
-      @Manual{,
-        title = {pippy: Python Client for the PIP API},
-        author = {[Your Name]},
-        year = {2023},
-        note = {https://github.com/[your_username]/pippy},
-      }
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 

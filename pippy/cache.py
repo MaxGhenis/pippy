@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 from datetime import datetime, timedelta
+import pandas as pd
 
 CACHE_DIR = Path.home() / ".pippy_cache"
 

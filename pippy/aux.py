@@ -13,17 +13,6 @@ def get_aux(
     format="json",
     assign_tb=False,
 ):
-    """
-    Get auxiliary data.
-
-    :param table: Name of the auxiliary table
-    :param version: Data version
-    :param ppp_version: PPP year to be used
-    :param release_version: Date when the data was published in YYYYMMDD format
-    :param format: Response format, one of 'json', 'csv', or 'rds'
-    :param assign_tb: If True, assigns the table to a global dictionary
-    :return: Pandas DataFrame (for CSV/JSON) or bytes (for RDS)
-    """
     if table is None:
         response = requests.get(f"{BASE_URL}/aux")
         return response.json()

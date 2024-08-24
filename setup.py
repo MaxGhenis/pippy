@@ -24,8 +24,5 @@ setup(
         "Programming Language :: Python :: 3.9",
     ],
     python_requires=">=3.10",
-    install_requires=[
-        "requests",
-        "pandas",
-    ],
+    install_requires=["requests", "pandas", "pytest"],
 )

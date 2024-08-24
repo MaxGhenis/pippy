@@ -23,24 +23,6 @@ def get_stats(
     debug=False,
     use_cache=True,
 ):
-    """
-    Get poverty and inequality statistics.
-
-    :param country: A string or list of country ISO 3 codes, or 'all'
-    :param year: An integer, list of years, or 'all'
-    :param povline: Poverty line (default is 2.15)
-    :param popshare: Proportion of the population living below the poverty line
-    :param fill_gaps: If True, will interpolate / extrapolate values for missing years
-    :param subgroup: If used, result will be aggregated for predefined sub-groups
-    :param welfare_type: Welfare type, one of 'all', 'income', or 'consumption'
-    :param reporting_level: Geographical reporting level, one of 'all', 'national', 'urban', or 'rural'
-    :param version: Data version
-    :param ppp_version: PPP year to be used
-    :param release_version: Date when the data was published in YYYYMMDD format
-    :param format: Response format, one of 'json', 'csv', or 'rds'
-    :param debug: If True, prints debug information
-    :return: Pandas DataFrame
-    """
     cache_key = f"stats_{country}_{year}_{povline}_{welfare_type}_{reporting_level}_{version}_{ppp_version}_{release_version}"
 
     if use_cache:
@@ -65,59 +47,38 @@ def get_stats(
         print(f"Request params: {params}")
 
     try:
-        response = requests.get(url, params=params)
+        response = requests.get(url, params=params, timeout=10)
         if debug:
             print(f"Response status code: {response.status_code}")
             print(f"Response headers: {response.headers}")
             print(f"Raw response content: {response.text[:1000]}...")
         response.raise_for_status()
+
+        if (
+            "text/html" in response.headers.get("Content-Type", "")
+            or "<html>" in response.text[:100]
+        ):
+            raise PIPAPIError(
+                "API returned HTML instead of expected JSON. The service may be experiencing issues."
+            )
+
+        data = response.json()
+        df = (
+            pd.DataFrame(data)
+            if isinstance(data, list)
+            else pd.DataFrame([data])
+        )
+        cache_response(cache_key, data)
+        return df
     except requests.RequestException as e:
         if debug:
             print(f"Request exception: {str(e)}")
             print(f"Response content: {response.text[:1000]}...")
-        raise PIPAPIError(
-            f"API request failed: {str(e)}\nResponse content: {response.text[:1000]}..."
-        )
-
-    content_type = response.headers.get("Content-Type", "")
-    if debug:
-        print(f"Content-Type: {content_type}")
-
-    if "text/html" in content_type or "<html>" in response.text[:100]:
-        error_msg = "The API is currently experiencing issues. Please try again later or contact the API maintainers."
+        raise PIPAPIError(f"API request failed: {str(e)}")
+    except ValueError as e:
         if debug:
-            error_msg += f"\nStatus code: {response.status_code}\nResponse content: {response.text[:1000]}..."
-        raise PIPAPIError(error_msg)
-
-    if format == "json":
-        try:
-            data = response.json()
-            if debug:
-                print(f"JSON data: {json.dumps(data, indent=2)[:500]}...")
-            df = (
-                pd.DataFrame(data)
-                if isinstance(data, list)
-                else pd.DataFrame([data])
-            )
-            cache_response(cache_key, data)
-            return df
-        except json.JSONDecodeError:
-            if debug:
-                print("Failed to parse JSON")
-            raise PIPAPIError("API returned invalid JSON")
-    elif format == "csv":
-        try:
-            df = pd.read_csv(StringIO(response.text))
-            if debug:
-                print(f"DataFrame shape: {df.shape}")
-                print(f"DataFrame columns: {df.columns}")
-            return df
-        except pd.errors.EmptyDataError:
-            if debug:
-                print("Empty DataFrame")
-            raise PIPAPIError("API returned an empty CSV")
-    else:
-        return response.content  # For RDS format
+            print(f"Failed to parse response: {str(e)}")
+        raise PIPAPIError(f"Failed to parse API response: {str(e)}")
 
 
 def get_wb(
@@ -128,17 +89,6 @@ def get_wb(
     release_version=None,
     format="json",
 ):
-    """
-    Get World Bank global and regional aggregates.
-
-    :param year: An integer, list of years, or 'all'
-    :param povline: Poverty line (default is 2.15)
-    :param version: Data version
-    :param ppp_version: PPP year to be used
-    :param release_version: Date when the data was published in YYYYMMDD format
-    :param format: Response format, one of 'json', 'csv', or 'rds'
-    :return: Pandas DataFrame
-    """
     return get_stats(
         country="all",
         year=year,
