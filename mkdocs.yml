@@ -1,0 +1,42 @@
+site_name: pippy Documentation
+theme:
+  name: material
+
+docs_dir: docs
+site_dir: site
+
+use_directory_urls: false
+
+plugins:
+  - search
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          rendering:
+            show_source: true
+            show_root_heading: true
+            show_object_full_path: false
+            show_category_heading: false
+            group_by_category: true
+
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - API Reference: api.md
+  - Examples:
+    - Basic Usage: examples/basic-usage.md
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - admonition
+  - pymdownx.arithmatex:
+      generic: true
+  - footnotes
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.mark
+  - attr_list
