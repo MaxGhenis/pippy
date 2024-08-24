@@ -3,6 +3,35 @@ from .constants import BASE_URL
 from .exceptions import PIPAPIError
 
 
+def check_api_status():
+    """
+    Check the status of different API endpoints.
+
+    :return: A dictionary with the status of each endpoint
+    """
+    endpoints = {
+        "pip": f"{BASE_URL}/pip",
+        "pip-info": f"{BASE_URL}/pip-info",
+        "health-check": f"{BASE_URL}/health-check",
+    }
+
+    status = {}
+    for name, url in endpoints.items():
+        try:
+            response = requests.get(url)
+            if (
+                response.status_code == 200
+                and not response.text.strip().startswith("<html>")
+            ):
+                status[name] = "OK"
+            else:
+                status[name] = f"Error (Status: {response.status_code})"
+        except requests.RequestException:
+            status[name] = "Connection Error"
+
+    return status
+
+
 def check_api(api_version="v1"):
     """
     Check internet connection and API status.

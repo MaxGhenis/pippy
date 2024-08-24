@@ -4,6 +4,7 @@ import json
 from io import StringIO
 from .constants import BASE_URL
 from .exceptions import PIPAPIError
+from .cache import cache_response, get_cached_response
 
 
 def get_stats(
@@ -20,6 +21,7 @@ def get_stats(
     release_version=None,
     format="json",
     debug=False,
+    use_cache=True,
 ):
     """
     Get poverty and inequality statistics.
@@ -39,6 +41,13 @@ def get_stats(
     :param debug: If True, prints debug information
     :return: Pandas DataFrame
     """
+    cache_key = f"stats_{country}_{year}_{povline}_{welfare_type}_{reporting_level}_{version}_{ppp_version}_{release_version}"
+
+    if use_cache:
+        cached_data = get_cached_response(cache_key)
+        if cached_data:
+            return pd.DataFrame(cached_data)
+
     endpoint = "pip" if subgroup is None else "pip-grp"
     params = {
         k: v
@@ -60,9 +69,7 @@ def get_stats(
         if debug:
             print(f"Response status code: {response.status_code}")
             print(f"Response headers: {response.headers}")
-            print(
-                f"Raw response content: {response.text[:1000]}..."
-            )  # Print first 1000 characters of raw content
+            print(f"Raw response content: {response.text[:1000]}...")
         response.raise_for_status()
     except requests.RequestException as e:
         if debug:
@@ -76,11 +83,10 @@ def get_stats(
     if debug:
         print(f"Content-Type: {content_type}")
 
-    if "text/html" in content_type:
-        error_msg = f"API returned an HTML error page. Status code: {response.status_code}\n"
-        error_msg += f"Response content: {response.text[:1000]}..."
+    if "text/html" in content_type or "<html>" in response.text[:100]:
+        error_msg = "The API is currently experiencing issues. Please try again later or contact the API maintainers."
         if debug:
-            print(error_msg)
+            error_msg += f"\nStatus code: {response.status_code}\nResponse content: {response.text[:1000]}..."
         raise PIPAPIError(error_msg)
 
     if format == "json":
@@ -88,17 +94,17 @@ def get_stats(
             data = response.json()
             if debug:
                 print(f"JSON data: {json.dumps(data, indent=2)[:500]}...")
-            return (
+            df = (
                 pd.DataFrame(data)
                 if isinstance(data, list)
                 else pd.DataFrame([data])
             )
+            cache_response(cache_key, data)
+            return df
         except json.JSONDecodeError:
             if debug:
                 print("Failed to parse JSON")
-            raise PIPAPIError(
-                f"API returned invalid JSON. Raw content: {response.text[:1000]}..."
-            )
+            raise PIPAPIError("API returned invalid JSON")
     elif format == "csv":
         try:
             df = pd.read_csv(StringIO(response.text))
