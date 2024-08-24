@@ -7,9 +7,43 @@ on:
     branches: [main]
 
 env:
-  PYTHON_VERSION: "3.11"
+  PYTHON_VERSION: "3.12"
 
 jobs:
+  debug-install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Debug Info
+        run: |
+          python --version
+          pip --version
+          which python
+          which pip
+          echo $PYTHONPATH
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+          pip freeze
+      - name: Install dev dependencies
+        run: |
+          pip install -e ".[dev]"
+          pip freeze
+      - name: Debug Installed Packages
+        run: |
+          pip list
+          python -c "import site; print(site.getsitepackages())"
+          python -c "import sys; print(sys.path)"
+      - name: Test imports
+        run: |
+          python -c "import requests; print(requests.__file__)"
+          python -c "import pandas; print(pandas.__file__)"
+          python -c "import pippy; print(pippy.__file__)"
   lint:
     runs-on: ubuntu-latest
     steps:
