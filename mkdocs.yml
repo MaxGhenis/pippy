@@ -1,4 +1,5 @@
 site_name: pippy Documentation
+site_url: https://maxghenis.github.io/pippy/
 theme:
   name: material
 
