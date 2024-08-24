@@ -4,7 +4,7 @@ from io import StringIO
 from pippy import get_stats
 from pippy.exceptions import PIPAPIError
 from pippy.logger import pippy_logger
-from pippy.cache import cache_response, get_cached_response
+from pippy.cache import cache_response
 
 
 class TestDebugMode(unittest.TestCase):

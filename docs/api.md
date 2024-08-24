@@ -16,14 +16,14 @@ This page contains the API reference for the pippy package.
 
 ### get_countries
 
-::: pippy.aux.get_countries
+::: pippy.auxiliary.get_countries
 
 ### get_regions
 
-::: pippy.aux.get_regions
+::: pippy.auxiliary.get_regions
 
 ### get_cpi
 
-::: pippy.aux.get_cpi
+::: pippy.auxiliary.get_cpi
 
 For more detailed information about each function and its parameters, please refer to the source code documentation.

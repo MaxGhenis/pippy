@@ -1,5 +1,5 @@
 from .stats import get_stats, get_wb
-from .aux import (
+from .auxiliary import (
     get_aux,
     get_countries,
     get_regions,

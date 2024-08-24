@@ -6,18 +6,31 @@ build-backend = "setuptools.build_meta"
 name = "pippy"
 version = "0.1.0"
 authors = [
-    { name = "Your Name", email = "your.email@example.com" },
+    { name = "Max Ghenis", email = "mghenis@gmail.com" },
 ]
 description = "A Python package for accessing the World Bank's Poverty and Inequality Platform (PIP) API"
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.10,<3.13"
 classifiers = [
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
+dependencies = [
+    "requests>=2.26.0,<3",
+    "pandas>=1.3.3,<3",
+]
 
 [project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "black>=22.0",
+    "build>=0.7",
+]
 docs = [
     "mkdocs",
     "mkdocs-material",
@@ -29,3 +42,21 @@ docs = [
 [project.urls]
 "Homepage" = "https://github.com/yourusername/pippy"
 "Bug Tracker" = "https://github.com/yourusername/pippy/issues"
+
+[tool.black]
+line-length = 79
+target-version = ['py310', 'py311', 'py312']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
