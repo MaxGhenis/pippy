@@ -25,20 +25,20 @@ setup(
     ],
     python_requires=">=3.10",
     install_requires=[
-        "requests",
-        "pandas",
+        "requests>=2.26.0",
+        "pandas>=1.3.3",
     ],
     extras_require={
         "dev": [
-            "pytest",
-            "pytest-cov",
-            "black",
-            "build",
+            "pytest>=7.0",
+            "pytest-cov>=4.0",
+            "black>=22.0",
+            "build>=0.7",
         ],
         "docs": [
-            "mkdocs",
-            "mkdocs-material",
-            "mkdocstrings[python]",
+            "mkdocs>=1.3",
+            "mkdocs-material>=8.0",
+            "mkdocstrings[python]>=0.19",
         ],
     },
     entry_points={

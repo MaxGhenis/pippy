@@ -10,7 +10,7 @@ install-docs:
 	pip install -e ".[docs]"
 
 test:
-	pytest tests/ --cov=pippy --cov-report=xml
+	python -m pytest tests/ --cov=pippy --cov-report=xml
 
 build:
 	python -m build
