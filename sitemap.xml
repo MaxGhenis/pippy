@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+         <loc>https://maxghenis.github.io/pippy/index.html</loc>
+         <lastmod>2024-08-24</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://maxghenis.github.io/pippy/api.html</loc>
+         <lastmod>2024-08-24</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://maxghenis.github.io/pippy/getting-started.html</loc>
+         <lastmod>2024-08-24</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://maxghenis.github.io/pippy/examples/basic-usage.html</loc>
+         <lastmod>2024-08-24</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+</urlset>
